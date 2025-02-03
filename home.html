@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000">
-    <title>Allied Tajar Retailor</title>
+    <title>VIP</title>
     <meta name="description" content="Finapp HTML Mobile Template">
     <meta name="keywords"
         content="bootstrap, wallet, banking, fintech mobile template, cordova, phonegap, mobile, html, responsive" />
@@ -220,37 +220,47 @@
     </div>
     <!-- History -->
     <!-- Form Action Sheet -->
-    <div class="modal fade action-sheet" id="actionSheetForm" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Create Custom Order</h5>
-                </div>
-                <div class="modal-body">
-                    <div class="action-sheet-content">
+<!-- Form Action Sheet -->
+<div class="modal fade action-sheet" id="actionSheetForm" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title">Create Custom Order</h5>
+          </div>
+          <div class="modal-body">
+              <div class="action-sheet-content">
+                  <form id="customOrderForm">
+                      <div class="form-group basic">
+                          <label class="label">Enter Amount</label>
+                          <div class="input-group">
+                              <span class="input-group-text" id="basic-addon1">Rs</span>
+                              <input type="text" class="form-control" id="orderAmount" placeholder="0.00" value="">
+                          </div>
+                      </div>
+                      <div class="form-group basic">
+                          <label class="label" for="orderStatus">Select Status</label>
+                          <select class="form-control custom-select" id="orderStatus">
+                              <option value="unpaid">Unpaid</option>
+                              <option value="paid">Paid</option>
+                          </select>
+                      </div>
+                      <div class="form-group basic">
+                          <label class="label" for="orderName">Enter Customer Name</label>
+                          <input type="text" class="form-control" id="orderName" placeholder="VIP" value="VIP">
+                      </div>
 
-                        <form>
-                            <div class="form-group basic">
-                                <label class="label">Enter Amount</label>
-                                <div class="input-group">
-                                    <span class="input-group-text" id="basic-addon1">Rs
-                                    </span>
-                                    <input type="text" class="form-control" placeholder="0.00" value="">
-                                </div>
-                            </div>
+                      <div class="form-group basic">
+                          <button type="button" class="btn btn-primary btn-block btn-lg" id="createOrderBtn">Create</button>
+                      </div>
+                  </form>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+<!-- * Form Action Sheet -->
 
-                            <div class="form-group basic">
-                                <button type="button" class="btn btn-primary btn-block btn-lg"
-                                    data-bs-dismiss="modal">Create</button>
-                            </div>
-                        </form>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- * Form Action Sheet -->
+  <!-- * Form Action Sheet -->
     <!-- app footer -->
     <div class="appFooter mt-2">
         <div class="footer-title">
@@ -449,6 +459,49 @@ function deleteAllOrders() {
   } else {
     console.log('Deletion of orders was canceled.');
   }
+}
+
+
+// Event listener for creating a custom order
+document.getElementById('createOrderBtn').addEventListener('click', function() {
+    const amount = document.getElementById('orderAmount').value;
+    const status = document.getElementById('orderStatus').value;
+    const name = document.getElementById('orderName').value || 'VIP'; // Default to 'VIP' if empty
+
+    // Check if amount is a valid number
+    if (isNaN(amount) || amount <= 0) {
+        alert("Please enter a valid amount.");
+        return;
+    }
+
+    // Create the order object
+    const newOrder = {
+        item: `Custom Order for ${name}`, // Order description with name
+        price: parseFloat(amount), // Convert to number
+        status: status
+    };
+
+    // Add the new order to the IndexedDB
+    addOrderToDatabase(newOrder);
+
+    // Close the modal after order is created
+    $('#actionSheetForm').modal('hide');
+});
+
+// Function to add the custom order to the IndexedDB
+function addOrderToDatabase(order) {
+    const transaction = db.transaction(['orders'], 'readwrite');
+    const orderStore = transaction.objectStore('orders');
+    
+    orderStore.add(order);
+
+    transaction.oncomplete = function() {
+        displayOrders(); // Refresh order list after adding the order
+    };
+
+    transaction.onerror = function() {
+        console.error('Transaction failed');
+    };
 }
 
     </script>
